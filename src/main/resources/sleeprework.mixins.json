@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "package": "party.lemons.sleeprework.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
+  "client": [
+    "client.AbstractContainerScreenMixin"
+  ],
+  "mixins": [
+    "ServerPlayerMixin",
+    "ServerLevelMixin",
+    "PhantomSpawnerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

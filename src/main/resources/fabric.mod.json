@@ -1,0 +1,27 @@
+{
+	"schemaVersion": 1,
+	"id": "${id}",
+	"version": "${version}",
+	"name": "${name}",
+	"description": "You can only sleep once you're tired, and phantoms come for the players who stay up too long. Based on Sleep Rework by Lemonszz.",
+	"authors": ["traelmyx"],
+	"contributors": ["Lemonszz (original mod)"],
+	"contact": {
+		"sources": "https://github.com/traelmyx/sleep-rework-reborn",
+		"issues": "https://github.com/traelmyx/sleep-rework-reborn/issues"
+	},
+	"license": "MIT",
+	"icon": "assets/sleeprework/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": ["party.lemons.sleeprework.fabric.SleepReworkFabric"],
+		"client": ["party.lemons.sleeprework.fabric.SleepReworkFabricClient"]
+	},
+	"mixins": ["sleeprework.mixins.json"],
+	"depends": {
+		"fabricloader": ">=0.16.0",
+		"fabric-api": "*",
+		"minecraft": "${mc_dep}",
+		"java": ">=${java}"
+	}
+}

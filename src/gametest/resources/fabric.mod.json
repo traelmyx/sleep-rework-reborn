@@ -1,0 +1,14 @@
+{
+	"schemaVersion": 1,
+	"id": "${id}_gametest",
+	"version": "${version}",
+	"name": "Sleep Rework GameTests",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-gametest": ["party.lemons.sleeprework.test.fabric.FabricGameTests"],
+		"client": ["party.lemons.sleeprework.test.fabric.FabricClientSmoke"]
+	},
+	"depends": {
+		"${id}": "*"
+	}
+}

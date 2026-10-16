@@ -1,0 +1,29 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "MIT"
+issueTrackerURL = "https://github.com/traelmyx/sleep-rework-reborn/issues"
+
+[[mods]]
+modId = "${id}"
+version = "${version}"
+displayName = "${name}"
+authors = "traelmyx, Lemonszz"
+${logo_key} = "assets/sleeprework/icon.png"
+description = '''You can only sleep once you're tired, and phantoms come for the players who stay up too long. Based on Sleep Rework by Lemonszz.'''
+
+[[mixins]]
+config = "sleeprework.mixins.json"
+
+[[dependencies.${id}]]
+modId = "neoforge"
+type = "required"
+versionRange = "[${neoforge_major},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "${mc_dep}"
+ordering = "NONE"
+side = "BOTH"
