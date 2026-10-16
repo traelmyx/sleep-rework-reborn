@@ -109,7 +109,13 @@ public final class SleepTests {
     public static void tirednessIsSavedAndCommandWorks(GameTestHelper helper) {
         ServerPlayer player = helper.makeMockServerPlayerInLevel();
         var server = helper.getLevel().getServer();
-        server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(), "tiredness " + player.getStringUUID() + " 150 set");
+        String command = "tiredness " + player.getStringUUID() + " 150 set";
+        try {
+            int result = server.getCommands().getDispatcher().execute(command, server.createCommandSourceStack().withSuppressedOutput());
+            helper.assertTrue(result == 1, command + " returned " + result);
+        } catch (com.mojang.brigadier.exceptions.CommandSyntaxException e) {
+            helper.fail(command + " failed: " + e.getMessage());
+        }
         helper.assertTrue(close(ServerHandler.getPlayerTiredness(player), 1.5f), "/tiredness set gave " + ServerHandler.getPlayerTiredness(player));
         CompoundTag tag = new CompoundTag();
         player.addAdditionalSaveData(tag);
