@@ -109,7 +109,9 @@ public final class SleepTests {
     public static void tirednessIsSavedAndCommandWorks(GameTestHelper helper) {
         ServerPlayer player = helper.makeMockServerPlayerInLevel();
         var server = helper.getLevel().getServer();
-        String command = "tiredness " + player.getStringUUID() + " 150 set";
+        // every mock player has the same name, so pick this one by where it stands
+        player.moveTo(helper.absoluteVec(new Vec3(0.5, 2, 0.5)));
+        String command = String.format(java.util.Locale.ROOT, "tiredness @a[x=%.2f,y=%.2f,z=%.2f,distance=..0.1,limit=1] 150 set", player.getX(), player.getY(), player.getZ());
         try {
             int result = server.getCommands().getDispatcher().execute(command, server.createCommandSourceStack().withSuppressedOutput());
             helper.assertTrue(result == 1, command + " returned " + result);
