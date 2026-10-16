@@ -78,7 +78,8 @@ public final class ClientSmoke {
                     }
                     if (ticks == 90) {
                         // hover the tiredness icon so its tooltip shows in the screenshot
-                        var widget = mc.screen.children().stream().filter(c -> c instanceof SleepDisplayWidget).map(c -> (SleepDisplayWidget) c).findFirst().orElse(null);
+                        // typed as the vanilla class so the calls are remapped in the production Fabric run
+                        net.minecraft.client.gui.components.AbstractWidget widget = mc.screen.children().stream().filter(c -> c instanceof SleepDisplayWidget).map(c -> (net.minecraft.client.gui.components.AbstractWidget) c).findFirst().orElse(null);
                         if (widget == null) fail("no tiredness icon on the inventory screen");
                         double scale = mc.getWindow().getGuiScale();
                         org.lwjgl.glfw.GLFW.glfwSetCursorPos(mc.getWindow().getWindow(), (widget.getX() + 6) * scale, (widget.getY() + 6) * scale);

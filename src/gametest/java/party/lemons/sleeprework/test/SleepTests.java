@@ -50,6 +50,7 @@ public final class SleepTests {
     }
 
     public static void onlyTiredPlayersCanSleep(GameTestHelper helper) {
+        // the sky darkness that decides "is it night" only updates on the next tick
         helper.getLevel().setDayTime(18000);
         BlockPos foot = new BlockPos(1, 2, 1);
         helper.setBlock(foot, Blocks.RED_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.SOUTH).setValue(BedBlock.PART, BedPart.FOOT));
@@ -57,16 +58,18 @@ public final class SleepTests {
         BlockPos head = helper.absolutePos(foot.south());
         ServerPlayer player = helper.makeMockServerPlayerInLevel();
         player.moveTo(helper.absoluteVec(new Vec3(2.5, 2, 2.5)));
-        ServerHandler.setPlayerTiredness(player, 0);
-        var rested = player.startSleepInBed(head);
-        helper.assertTrue(rested.left().isPresent(), "a rested player fell asleep");
-        helper.assertFalse(player.isSleeping(), "rested player is sleeping");
-        ServerHandler.setPlayerTiredness(player, SleepRework.CONFIG.playerConfig().minSleepLevel() + 0.1f);
-        var tired = player.startSleepInBed(head);
-        helper.assertTrue(tired.right().isPresent() && player.isSleeping(), "a tired player could not sleep: " + tired.left().orElse(null));
-        player.stopSleeping();
-        helper.getLevel().setDayTime(1000);
-        helper.succeed();
+        helper.runAfterDelay(3, () -> {
+            ServerHandler.setPlayerTiredness(player, 0);
+            var rested = player.startSleepInBed(head);
+            helper.assertTrue(rested.left().isPresent(), "a rested player fell asleep");
+            helper.assertFalse(player.isSleeping(), "rested player is sleeping");
+            ServerHandler.setPlayerTiredness(player, SleepRework.CONFIG.playerConfig().minSleepLevel() + 0.1f);
+            var tired = player.startSleepInBed(head);
+            helper.assertTrue(tired.right().isPresent() && player.isSleeping(), "a tired player could not sleep: " + tired.left().orElse(null));
+            player.stopSleeping();
+            helper.getLevel().setDayTime(1000);
+            helper.succeed();
+        });
     }
 
     public static void wakingUpRestsAndHeals(GameTestHelper helper) {
@@ -106,7 +109,7 @@ public final class SleepTests {
     public static void tirednessIsSavedAndCommandWorks(GameTestHelper helper) {
         ServerPlayer player = helper.makeMockServerPlayerInLevel();
         var server = helper.getLevel().getServer();
-        server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(), "tiredness " + player.getGameProfile().getName() + " 150 set");
+        server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(), "tiredness " + player.getStringUUID() + " 150 set");
         helper.assertTrue(close(ServerHandler.getPlayerTiredness(player), 1.5f), "/tiredness set gave " + ServerHandler.getPlayerTiredness(player));
         CompoundTag tag = new CompoundTag();
         player.addAdditionalSaveData(tag);
