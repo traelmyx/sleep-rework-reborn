@@ -177,7 +177,7 @@ public record SleepReworkConfig(PlayerConfig playerConfig, PhantomConfig phantom
                 if(!allowRecursion)
                     return null;
 
-                Map c1 = gson.fromJson(newConfigJson.get().left().get(), HashMap.class);
+                Map c1 = gson.fromJson(newConfigJson.result().get(), HashMap.class);
                 Map c2 = gson.fromJson(json, HashMap.class);
 
                 SleepReworkConfig fixedConfig = attemptLoad(gson, gson.toJsonTree(SleepReworkUtil.recursiveCollectionMerge(c1, c2)), false);
