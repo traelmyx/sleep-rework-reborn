@@ -37,6 +37,14 @@ public final class SleepTests {
         //?}
     }
 
+    private static net.minecraft.world.level.block.state.BlockState redBed() {
+        //? if >=26 {
+        /*return Blocks.BED.red().defaultBlockState();
+        *///?} else {
+        return Blocks.RED_BED.defaultBlockState();
+        //?}
+    }
+
     private static void command(GameTestHelper helper, String command) {
         var server = helper.getLevel().getServer();
         server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(), command);
@@ -68,8 +76,8 @@ public final class SleepTests {
         // "is it night" follows the sky darkness, which only updates on the next tick
         command(helper, "time set 18000");
         BlockPos foot = new BlockPos(1, 2, 1);
-        helper.setBlock(foot, Blocks.RED_BED.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH).setValue(BlockStateProperties.BED_PART, BedPart.FOOT));
-        helper.setBlock(foot.south(), Blocks.RED_BED.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH).setValue(BlockStateProperties.BED_PART, BedPart.HEAD));
+        helper.setBlock(foot, redBed().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH).setValue(BlockStateProperties.BED_PART, BedPart.FOOT));
+        helper.setBlock(foot.south(), redBed().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH).setValue(BlockStateProperties.BED_PART, BedPart.HEAD));
         ServerPlayer player = helper.makeMockServerPlayerInLevel();
         place(player, helper.absoluteVec(new Vec3(2.5, 2, 2.5)));
         helper.runAfterDelay(3, () -> {
