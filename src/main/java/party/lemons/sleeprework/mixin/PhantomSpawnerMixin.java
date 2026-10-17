@@ -11,10 +11,19 @@ import party.lemons.sleeprework.SleepRework;
 @Mixin(PhantomSpawner.class)
 public class PhantomSpawnerMixin
 {
+    //? if >=1.21.11 {
+    /*@Inject(at = @At("HEAD"), method = "tick", cancellable = true)
+    private void tick(ServerLevel arg, boolean bl, org.spongepowered.asm.mixin.injection.callback.CallbackInfo cbi)
+    {
+        if(SleepRework.CONFIG.phantomConfig().disableVanillaPhantomSpawner())
+            cbi.cancel();
+    }
+    *///?} else {
     @Inject(at = @At("HEAD"), method = "tick", cancellable = true)
     private void tick(ServerLevel arg, boolean bl, boolean bl2, CallbackInfoReturnable<Integer> cbi)
     {
         if(SleepRework.CONFIG.phantomConfig().disableVanillaPhantomSpawner())
             cbi.setReturnValue(0);
     }
+    //?}
 }

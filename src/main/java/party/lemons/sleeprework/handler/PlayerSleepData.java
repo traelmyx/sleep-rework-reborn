@@ -29,7 +29,11 @@ public class PlayerSleepData
 
     public void load(CompoundTag tag)
     {
+        //? if >=1.21.5 {
+        /*tiredness = tag.getFloatOr(TAG_TIREDNESS, 0);
+        *///?} else {
         tiredness = tag.getFloat(TAG_TIREDNESS);
+        //?}
     }
 
     protected static final String TAG_TIREDNESS = "SR_Tiredness";

@@ -20,7 +20,12 @@ public class TiredCommand
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext ctx, Commands.CommandSelection selection)
     {
         dispatcher.register(
-                Commands.literal("tiredness").requires(commandSourceStack -> commandSourceStack.hasPermission(2))
+                Commands.literal("tiredness")
+                        //? if >=1.21.11 {
+                        /*.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                        *///?} else {
+                        .requires(commandSourceStack -> commandSourceStack.hasPermission(2))
+                        //?}
                         .then(
                                 Commands.argument("Target", EntityArgument.players())
                                         .then(

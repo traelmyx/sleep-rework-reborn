@@ -2,20 +2,38 @@ package party.lemons.sleeprework.client;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+//? if >=26 {
+/*import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+*///?} else if >=1.21.11 {
+/*import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+*///?} else {
 import net.minecraft.client.gui.GuiGraphics;
+//?}
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+//? if >=1.21.11 {
+/*import net.minecraft.resources.Identifier;
+*///?} else {
 import net.minecraft.resources.ResourceLocation;
+//?}
 import net.minecraft.util.Mth;
 import party.lemons.sleeprework.SleepRework;
 import party.lemons.sleeprework.config.SleepReworkConfig;
 
 public class SleepDisplayWidget extends AbstractWidget
 {
+    //? if >=1.21.11 {
+    /*private static final Identifier ICONS = SleepRework.id("textures/gui/icons.png");
+    *///?} else {
     private static final ResourceLocation ICONS = SleepRework.id("textures/gui/icons.png");
+    //?}
     private float lastTiredness;
     public SleepDisplayWidget(int x, int y) {
         super(x, y, 12, 12, Component.empty());
@@ -38,8 +56,13 @@ public class SleepDisplayWidget extends AbstractWidget
         return Tooltip.create(component);
     }
 
+    //? if >=1.21.11 {
+    /*@Override
+    public void onClick(MouseButtonEvent event, boolean doubleClick) {
+    *///?} else {
     @Override
     public void onClick(double d, double e) {
+    //?}
         if(SleepRework.CONFIG.clientConfig().showTutorial().get()) {
             SleepRework.CONFIG.clientConfig().showTutorial().set(false);
             setTooltip(createTooltip());
@@ -48,9 +71,15 @@ public class SleepDisplayWidget extends AbstractWidget
         }
     }
 
+    //? if >=26 {
+    /*@Override
+    protected void extractWidgetRenderState(GuiGraphicsExtractor guiGraphics, int i, int j, float f)
+    {
+    *///?} else {
     @Override
     protected void renderWidget(GuiGraphics guiGraphics, int i, int j, float f)
     {
+    //?}
         float sleepLevel = SleepRework.localSleepData.getTiredness();
         if(sleepLevel != lastTiredness) {
             lastTiredness = sleepLevel;
@@ -59,11 +88,15 @@ public class SleepDisplayWidget extends AbstractWidget
 
         if(isHovered())
         {
+            //? if >=1.21.11 {
+            /*guiGraphics.blit(RenderPipelines.GUI_TEXTURED, ICONS, getX(), getY(), 0, 0, 12, 12, 256, 256);
+            *///?} else {
             guiGraphics.blit(ICONS, getX(), getY(), 0, 0, 12, 12);
+            //?}
         }
         else
         {
-
+            int tint = 0xFFFFFFFF;
             if(SleepRework.CONFIG.clientConfig().doRecolor()) {
                 int c1, c2;
                 float ratio;
@@ -82,15 +115,15 @@ public class SleepDisplayWidget extends AbstractWidget
                 }
 
                 int finalColor = interpolate(c1, c2, ratio);
-
-                float r = ((finalColor >> 16) & 0xff) / 255.0f;
-                float g = ((finalColor >> 8) & 0xff) / 255.0f;
-                float b = ((finalColor) & 0xff) / 255.0f;
-
-                guiGraphics.setColor(r, g, b, 1.0F);
+                tint = 0xFF000000 | (finalColor & 0xFFFFFF);
             }
+            //? if >=1.21.11 {
+            /*guiGraphics.blit(RenderPipelines.GUI_TEXTURED, ICONS, getX(), getY(), 0, 12, 12, 12, 256, 256, tint);
+            *///?} else {
+            guiGraphics.setColor(((tint >> 16) & 0xff) / 255.0f, ((tint >> 8) & 0xff) / 255.0f, (tint & 0xff) / 255.0f, 1.0F);
             guiGraphics.blit(ICONS, getX(), getY(), 0, 12, 12, 12);
             guiGraphics.setColor(1F, 1F, 1F, 1F);
+            //?}
         }
     }
 

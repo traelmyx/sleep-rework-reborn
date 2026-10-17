@@ -8,7 +8,11 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+//? if <26 {
 import net.fabricmc.fabric.api.registry.FabricBrewingRecipeRegistryBuilder;
+//?} else if <26.3 {
+/^import net.fabricmc.fabric.api.registry.FabricPotionBrewingBuilder;
+^///?}
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -19,6 +23,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.alchemy.Potion;
 import party.lemons.sleeprework.SleepRework;
+import party.lemons.sleeprework.util.Compat;
 import party.lemons.sleeprework.command.TiredCommand;
 import party.lemons.sleeprework.effect.SleepReworkPotions;
 import party.lemons.sleeprework.handler.ServerHandler;
@@ -41,9 +46,17 @@ public class SleepReworkFabric implements ModInitializer {
                 return Registry.registerForHolder(BuiltInRegistries.POTION, SleepRework.id(name), potion.get());
             }
         });
+        //? if <26 {
         FabricBrewingRecipeRegistryBuilder.BUILD.register(SleepReworkPotions::registerBrewing);
+        //?} else if <26.3 {
+        /^FabricPotionBrewingBuilder.BUILD.register(SleepReworkPotions::registerBrewing);
+        ^///?}
 
+        //? if >=26 {
+        /^PayloadTypeRegistry.clientboundPlay().register(TirednessPayload.TYPE, TirednessPayload.CODEC);
+        ^///?} else {
         PayloadTypeRegistry.playS2C().register(TirednessPayload.TYPE, TirednessPayload.CODEC);
+        //?}
         SleepRework.syncTiredness = (player, tiredness) -> {
             if (ServerPlayNetworking.canSend(player, TirednessPayload.TYPE)) {
                 ServerPlayNetworking.send(player, new TirednessPayload(tiredness));
@@ -56,8 +69,8 @@ public class SleepReworkFabric implements ModInitializer {
         CommandRegistrationCallback.EVENT.register(TiredCommand::register);
         EntitySleepEvents.ALLOW_SLEEPING.register((player, sleepingPos) -> {
             if (player instanceof ServerPlayer serverPlayer && !ServerHandler.canPlayerSleep(serverPlayer)) {
-                player.displayClientMessage(Component.translatable("sleeprework.sleep.not_tired"), true);
-                return Player.BedSleepingProblem.NOT_POSSIBLE_HERE;
+                if (!Compat.problemHasMessage()) Compat.overlay(player, Component.translatable("sleeprework.sleep.not_tired"));
+                return Compat.notTired();
             }
             return null;
         });

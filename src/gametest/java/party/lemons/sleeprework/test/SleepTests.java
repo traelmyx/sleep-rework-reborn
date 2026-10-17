@@ -14,7 +14,9 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.BedPart;
+//? if <1.21.11 {
 import net.minecraft.world.level.levelgen.PhantomSpawner;
+//?}
 import net.minecraft.world.phys.Vec3;
 import party.lemons.sleeprework.SleepRework;
 import party.lemons.sleeprework.effect.SleepReworkPotions;
@@ -25,6 +27,19 @@ import party.lemons.sleeprework.handler.SleepDataHolder;
 
 public final class SleepTests {
     private SleepTests() {
+    }
+
+    private static void place(ServerPlayer player, Vec3 at) {
+        //? if >=1.21.5 {
+        /*player.snapTo(at.x, at.y, at.z);
+        *///?} else {
+        player.moveTo(at.x, at.y, at.z);
+        //?}
+    }
+
+    private static void command(GameTestHelper helper, String command) {
+        var server = helper.getLevel().getServer();
+        server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(), command);
     }
 
     private static ServerPlayerSleepData data(ServerPlayer player) {
@@ -50,24 +65,22 @@ public final class SleepTests {
     }
 
     public static void onlyTiredPlayersCanSleep(GameTestHelper helper) {
-        // the sky darkness that decides "is it night" only updates on the next tick
-        helper.getLevel().setDayTime(18000);
+        // "is it night" follows the sky darkness, which only updates on the next tick
+        command(helper, "time set 18000");
         BlockPos foot = new BlockPos(1, 2, 1);
         helper.setBlock(foot, Blocks.RED_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.SOUTH).setValue(BedBlock.PART, BedPart.FOOT));
         helper.setBlock(foot.south(), Blocks.RED_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.SOUTH).setValue(BedBlock.PART, BedPart.HEAD));
-        BlockPos head = helper.absolutePos(foot.south());
         ServerPlayer player = helper.makeMockServerPlayerInLevel();
-        player.moveTo(helper.absoluteVec(new Vec3(2.5, 2, 2.5)));
+        place(player, helper.absoluteVec(new Vec3(2.5, 2, 2.5)));
         helper.runAfterDelay(3, () -> {
             ServerHandler.setPlayerTiredness(player, 0);
-            var rested = player.startSleepInBed(head);
-            helper.assertTrue(rested.left().isPresent(), "a rested player fell asleep");
-            helper.assertFalse(player.isSleeping(), "rested player is sleeping");
+            helper.useBlock(foot.south(), player);
+            helper.assertFalse(player.isSleeping(), "a rested player fell asleep");
             ServerHandler.setPlayerTiredness(player, SleepRework.CONFIG.playerConfig().minSleepLevel() + 0.1f);
-            var tired = player.startSleepInBed(head);
-            helper.assertTrue(tired.right().isPresent() && player.isSleeping(), "a tired player could not sleep: " + tired.left().orElse(null));
+            helper.useBlock(foot.south(), player);
+            helper.assertTrue(player.isSleeping(), "a tired player could not sleep");
             player.stopSleeping();
-            helper.getLevel().setDayTime(1000);
+            command(helper, "time set 1000");
             helper.succeed();
         });
     }
@@ -82,6 +95,16 @@ public final class SleepTests {
     }
 
     public static void potionsBrew(GameTestHelper helper) {
+        //? if >=26.3 {
+        /*// from 26.3 the mixes are recipes
+        var recipes = helper.getLevel().getServer().getRecipeManager();
+        for (String id : new String[] {"potion_awkward_honeycomb", "potion_liveliness_fermented_spider_eye", "splash_potion_drowsiness_glowstone_dust"}) {
+            var key = net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE, SleepRework.id("brewing/" + id));
+            helper.assertTrue(recipes.byKey(key).isPresent(), "missing brewing recipe " + id);
+        }
+        helper.succeed();
+        *///?} else {
+
         var brewing = helper.getLevel().potionBrewing();
         ItemStack awkward = PotionContents.createItemStack(Items.POTION, Potions.AWKWARD);
         ItemStack honeycomb = new ItemStack(SleepRework.CONFIG.potionConfig().livelinessBrewingItem());
@@ -91,10 +114,13 @@ public final class SleepTests {
         ItemStack drowsy = brewing.mix(new ItemStack(Items.FERMENTED_SPIDER_EYE), liveliness);
         helper.assertTrue(drowsy.getOrDefault(net.minecraft.core.component.DataComponents.POTION_CONTENTS, PotionContents.EMPTY).is(SleepReworkPotions.DROWSINESS_POTION), "corrupted to " + drowsy);
         helper.succeed();
+        //?}
     }
 
     public static void phantomsFollowTiredness(GameTestHelper helper) {
+        //? if <1.21.11 {
         helper.assertTrue(new PhantomSpawner().tick(helper.getLevel(), true, true) == 0, "the vanilla phantom spawner still runs");
+        //?}
         ReworkedPhantomSpawner spawner = new ReworkedPhantomSpawner();
         int count = spawner.getSpawnCount(SleepRework.CONFIG.playerConfig().maxTiredness(), helper.getLevel().getRandom());
         helper.assertTrue(count >= 1, "a fully tired player would get " + count + " phantoms");
@@ -110,7 +136,7 @@ public final class SleepTests {
         ServerPlayer player = helper.makeMockServerPlayerInLevel();
         var server = helper.getLevel().getServer();
         // every mock player has the same name, so pick this one by where it stands
-        player.moveTo(helper.absoluteVec(new Vec3(0.5, 2, 0.5)));
+        place(player, helper.absoluteVec(new Vec3(0.5, 2, 0.5)));
         String command = String.format(java.util.Locale.ROOT, "tiredness @a[x=%.2f,y=%.2f,z=%.2f,distance=..0.1,limit=1] 150 set", player.getX(), player.getY(), player.getZ());
         try {
             int result = server.getCommands().getDispatcher().execute(command, server.createCommandSourceStack().withSuppressedOutput());
@@ -119,10 +145,18 @@ public final class SleepTests {
             helper.fail(command + " failed: " + e.getMessage());
         }
         helper.assertTrue(close(ServerHandler.getPlayerTiredness(player), 1.5f), "/tiredness set gave " + ServerHandler.getPlayerTiredness(player));
+        //? if >=1.21.6 {
+        /*var output = net.minecraft.world.level.storage.TagValueOutput.createWithContext(net.minecraft.util.ProblemReporter.DISCARDING, helper.getLevel().registryAccess());
+        player.saveWithoutId(output);
+        CompoundTag tag = output.buildResult();
+        ServerHandler.setPlayerTiredness(player, 0);
+        player.load(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING, helper.getLevel().registryAccess(), tag));
+        *///?} else {
         CompoundTag tag = new CompoundTag();
         player.addAdditionalSaveData(tag);
         ServerHandler.setPlayerTiredness(player, 0);
         player.readAdditionalSaveData(tag);
+        //?}
         helper.assertTrue(close(ServerHandler.getPlayerTiredness(player), 1.5f), "tiredness not restored from save: " + ServerHandler.getPlayerTiredness(player));
         helper.succeed();
     }

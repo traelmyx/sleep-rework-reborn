@@ -25,6 +25,24 @@ public class ServerPlayerMixin implements SleepDataHolder {
         return sleepData;
     }
 
+    //? if >=1.21.6 {
+    /*@Inject(at = @At("TAIL"), method = "addAdditionalSaveData")
+    private void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output, CallbackInfo cbi)
+    {
+        CompoundTag sleepTag = new CompoundTag();
+        sleepData.save(sleepTag);
+        output.store(TAG_SLEEP_DATA, CompoundTag.CODEC, sleepTag);
+    }
+
+    @Inject(at = @At("TAIL"), method = "readAdditionalSaveData")
+    private void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input, CallbackInfo cbi)
+    {
+        input.read(TAG_SLEEP_DATA, CompoundTag.CODEC).ifPresent(sleepTag -> {
+            sleepData.load(sleepTag);
+            sleepData.syncTo(((ServerPlayer)(Object)this));
+        });
+    }
+    *///?} else {
     @Inject(at = @At("TAIL"), method = "addAdditionalSaveData")
     private void addAdditionalSaveData(CompoundTag tag, CallbackInfo cbi)
     {
@@ -43,6 +61,7 @@ public class ServerPlayerMixin implements SleepDataHolder {
             sleepData.syncTo(((ServerPlayer)(Object)this));
         }
     }
+    //?}
     // keep tiredness through death and dimension changes
     @Inject(at = @At("TAIL"), method = "restoreFrom")
     private void restoreFrom(ServerPlayer old, boolean alive, CallbackInfo cbi)

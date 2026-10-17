@@ -13,7 +13,9 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+//? if <26.3 {
 import net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent;
+//?}
 import net.neoforged.neoforge.event.entity.player.CanPlayerSleepEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerWakeUpEvent;
@@ -25,6 +27,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import party.lemons.sleeprework.SleepRework;
+import party.lemons.sleeprework.util.Compat;
 import party.lemons.sleeprework.command.TiredCommand;
 import party.lemons.sleeprework.effect.SleepReworkPotions;
 import party.lemons.sleeprework.handler.ServerHandler;
@@ -62,7 +65,9 @@ public class SleepReworkNeoForge {
         };
 
         var bus = NeoForge.EVENT_BUS;
+        //? if <26.3 {
         bus.addListener((RegisterBrewingRecipesEvent event) -> SleepReworkPotions.registerBrewing(event.getBuilder()));
+        //?}
         bus.addListener((ServerTickEvent.Pre event) -> ServerHandler.serverTick(event.getServer()));
         bus.addListener((LevelTickEvent.Post event) -> {
             if (event.getLevel() instanceof ServerLevel level) ServerHandler.levelTick(level);
@@ -73,8 +78,8 @@ public class SleepReworkNeoForge {
         bus.addListener((RegisterCommandsEvent event) -> TiredCommand.register(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection()));
         bus.addListener((CanPlayerSleepEvent event) -> {
             if (event.getEntity() instanceof ServerPlayer player && !ServerHandler.canPlayerSleep(player)) {
-                player.displayClientMessage(Component.translatable("sleeprework.sleep.not_tired"), true);
-                event.setProblem(Player.BedSleepingProblem.NOT_POSSIBLE_HERE);
+                if (!Compat.problemHasMessage()) Compat.overlay(player, Component.translatable("sleeprework.sleep.not_tired"));
+                event.setProblem(Compat.notTired());
             }
         });
         bus.addListener((PlayerWakeUpEvent event) -> {

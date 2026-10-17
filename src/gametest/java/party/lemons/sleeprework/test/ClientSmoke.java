@@ -1,16 +1,8 @@
 package party.lemons.sleeprework.test;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.WorldDataConfiguration;
-import net.minecraft.world.level.levelgen.WorldOptions;
-import net.minecraft.world.level.levelgen.presets.WorldPresets;
 
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import party.lemons.sleeprework.SleepRework;
@@ -51,19 +43,19 @@ public final class ClientSmoke {
         try {
             switch (stage) {
                 case 0 -> {
-                    Screen screen = mc.screen;
-                    if (screen != null && mc.getOverlay() == null && ++ticks >= 20) {
+                    Screen screen = SmokeCompat.screen(mc);
+                    if (screen != null && SmokeCompat.overlayHidden(mc) && ++ticks >= 20) {
                         if (screen.getClass().getSimpleName().equals("LoadingErrorScreen")) {
                             fail("mod loading errors");
                         }
                         ticks = 0;
                         mc.options.tutorialStep = net.minecraft.client.tutorial.TutorialSteps.NONE;
-                        createWorld(mc);
+                        SmokeCompat.createFlatWorld(mc, GameType.SURVIVAL);
                         stage = 1;
                     }
                 }
                 case 1 -> {
-                    if (mc.level != null && mc.player != null && mc.screen == null) {
+                    if (mc.level != null && mc.player != null && SmokeCompat.screen(mc) == null) {
                         stage = 2;
                     }
                 }
@@ -74,23 +66,20 @@ public final class ClientSmoke {
                         server.execute(() -> ServerHandler.setPlayerTiredness(server.getPlayerList().getPlayers().get(0), 2.0f));
                     }
                     if (ticks == 70) {
-                        mc.setScreen(new InventoryScreen(mc.player));
+                        SmokeCompat.setScreen(mc, new InventoryScreen(mc.player));
                     }
                     if (ticks == 90) {
-                        // hover the tiredness icon so its tooltip shows in the screenshot
                         // typed as the vanilla class so the calls are remapped in the production Fabric run
-                        net.minecraft.client.gui.components.AbstractWidget widget = mc.screen.children().stream().filter(c -> c instanceof SleepDisplayWidget).map(c -> (net.minecraft.client.gui.components.AbstractWidget) c).findFirst().orElse(null);
-                        if (widget == null) fail("no tiredness icon on the inventory screen");
-                        double scale = mc.getWindow().getGuiScale();
-                        org.lwjgl.glfw.GLFW.glfwSetCursorPos(mc.getWindow().getWindow(), (widget.getX() + 6) * scale, (widget.getY() + 6) * scale);
+                        boolean icon = SmokeCompat.screen(mc).children().stream().anyMatch(c -> c instanceof SleepDisplayWidget);
+                        if (!icon) fail("no tiredness icon on the inventory screen");
                     }
                     if (ticks == 120) {
-                        Screenshot.grab(mc.gameDirectory, "tiredness.png", mc.getMainRenderTarget(), msg -> {});
+                        SmokeCompat.screenshot(mc, "tiredness.png");
                     }
                     if (ticks >= 130) {
                         float seen = SleepRework.localSleepData.getTiredness();
                         if (Math.abs(seen - 2.0f) > 0.01f) fail("client sees tiredness " + seen);
-                        mc.setScreen(null);
+                        SmokeCompat.setScreen(mc, null);
                         Files.writeString(mc.gameDirectory.toPath().resolve("smoke-ok"), "ok\n");
                         stage = 3;
                         mc.stop();
@@ -103,13 +92,6 @@ public final class ClientSmoke {
             t.printStackTrace();
             fail(t.toString());
         }
-    }
-
-    private static void createWorld(Minecraft mc) {
-        LevelSettings settings = new LevelSettings("smoke", GameType.SURVIVAL, false, Difficulty.PEACEFUL, true, new GameRules(), WorldDataConfiguration.DEFAULT);
-        mc.createWorldOpenFlows().createFreshLevel("smoke", settings, new WorldOptions(0L, false, false),
-            registries -> registries.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.FLAT).value().createWorldDimensions(),
-            mc.screen);
     }
 
     public static void fail(String why) {

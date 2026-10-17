@@ -5,8 +5,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
+import party.lemons.sleeprework.util.Compat;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.monster.Phantom;
 import net.minecraft.world.level.NaturalSpawner;
@@ -18,7 +17,7 @@ public class ReworkedPhantomSpawner
 {
     public void tick(ServerLevel level)
     {
-        RandomSource rand = level.random;
+        RandomSource rand = level.getRandom();
         if (level.getSkyDarken() >= SleepRework.CONFIG.phantomConfig().requiredSkyDarken() || !level.dimensionType().hasSkyLight())  //If the dimension has sky light && if the sky is dark enough (TODO: config?)
         {
             for (ServerPlayer player : level.players())     //Loop each player in the world
@@ -42,8 +41,8 @@ public class ReworkedPhantomSpawner
                             BlockPos spawnPosition = playerPosition.above(20 + rand.nextInt(15)).east(-10 + rand.nextInt(21)).south(-10 + rand.nextInt(21));
                             BlockState currentState = level.getBlockState(spawnPosition);
                             FluidState currentFluid = level.getFluidState(spawnPosition);
-                            if (NaturalSpawner.isValidEmptySpawnBlock(level, spawnPosition, currentState, currentFluid, EntityType.PHANTOM)) {
-                                SpawnGroupData spawnGroupData = null;
+                            if (NaturalSpawner.isValidEmptySpawnBlock(level, spawnPosition, currentState, currentFluid, Compat.phantomType())) {
+                                SpawnGroupData[] spawnGroupData = {null};
 
                                 //Adjust the tiredness with the difficulty to get more phantoms if harder
                                 float tiredCheckLevel = tiredness + ((difficulty.getDifficulty().getId() + 1F) / 10);
@@ -52,10 +51,8 @@ public class ReworkedPhantomSpawner
                                 //Spawn phantoms
                                 for (int i = 0; i < phantomCount; ++i)
                                 {
-                                    Phantom phantom = EntityType.PHANTOM.create(level);
+                                    Phantom phantom = Compat.spawnPhantom(level, spawnPosition, difficulty, spawnGroupData);
                                     if (phantom != null) {
-                                        phantom.moveTo(spawnPosition, 0.0F, 0.0F);
-                                        spawnGroupData = phantom.finalizeSpawn(level, difficulty, MobSpawnType.NATURAL, spawnGroupData);
                                         level.addFreshEntityWithPassengers(phantom);
                                         ++i;
                                     }

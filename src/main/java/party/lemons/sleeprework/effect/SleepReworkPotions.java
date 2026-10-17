@@ -6,7 +6,9 @@ import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
+//? if <26.3 {
 import net.minecraft.world.item.alchemy.PotionBrewing;
+//?}
 import net.minecraft.world.item.alchemy.Potions;
 import party.lemons.sleeprework.SleepRework;
 
@@ -43,6 +45,8 @@ public class SleepReworkPotions
         STRONG_DROWSINESS_POTION = registrar.potion("strong_drowsiness", () -> new Potion("drowsiness", new MobEffectInstance(DROWSINESS, 15000, 1)));
     }
 
+    // before 26.3 the mixes are registered in code; from 26.3 they are recipes in data/sleeprework/recipe/brewing
+    //? if <26.3 {
     public static void registerBrewing(PotionBrewing.Builder builder)
     {
         builder.addMix(Potions.AWKWARD, SleepRework.CONFIG.potionConfig().livelinessBrewingItem(), LIVELINESS_POTION);
@@ -54,4 +58,5 @@ public class SleepReworkPotions
         builder.addMix(DROWSINESS_POTION, Items.REDSTONE, LONG_DROWSINESS_POTION);
         builder.addMix(DROWSINESS_POTION, Items.GLOWSTONE_DUST, STRONG_DROWSINESS_POTION);
     }
+    //?}
 }

@@ -1,6 +1,10 @@
 package party.lemons.sleeprework;
 
+//? if >=1.21.11 {
+/*import net.minecraft.resources.Identifier;
+*///?} else {
 import net.minecraft.resources.ResourceLocation;
+//?}
 import net.minecraft.server.level.ServerPlayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +30,13 @@ public class SleepRework
         CONFIG = SleepReworkConfig.loadConfig();
     }
 
+    //? if >=1.21.11 {
+    /*public static Identifier id(String name) {
+        return Identifier.fromNamespaceAndPath(MODID, name);
+    }
+    *///?} else {
     public static ResourceLocation id(String name) {
         return ResourceLocation.fromNamespaceAndPath(MODID, name);
     }
+    //?}
 }

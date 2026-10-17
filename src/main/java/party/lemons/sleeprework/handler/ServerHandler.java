@@ -6,7 +6,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.level.GameRules;
+import party.lemons.sleeprework.util.Compat;
 import party.lemons.sleeprework.SleepRework;
 
 public class ServerHandler
@@ -25,7 +25,7 @@ public class ServerHandler
                 - We're respecting the doInsomnia GameRule
                 - doInsomnia = false
          */
-        if(SleepRework.CONFIG.serverConfig().respectInsomniaGameRule() && !server.getGameRules().getBoolean(GameRules.RULE_DOINSOMNIA))
+        if(SleepRework.CONFIG.serverConfig().respectInsomniaGameRule() && !Compat.phantomRule(server.overworld()))
             return;
 
         //reset phantom spawner tick, so they won't run again
@@ -54,7 +54,7 @@ public class ServerHandler
     {
         if(doPhantomTick) { //If it's time to do a phantom tick, do it.
 
-            if (SleepRework.CONFIG.serverConfig().respectInsomniaGameRule() && !level.getGameRules().getBoolean(GameRules.RULE_DOINSOMNIA))
+            if (SleepRework.CONFIG.serverConfig().respectInsomniaGameRule() && !Compat.phantomRule(level))
                 return;
 
             phantomSpawner.tick(level);
@@ -70,7 +70,7 @@ public class ServerHandler
                     player.stopSleeping();
                     handleWakeUp(player);
 
-                    player.displayClientMessage(Component.translatable("sleeprework.sleep.timeout"), true);
+                    Compat.overlay(player, Component.translatable("sleeprework.sleep.timeout"));
                 }
             }
         }

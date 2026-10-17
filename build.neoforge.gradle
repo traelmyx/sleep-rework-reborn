@@ -20,6 +20,11 @@ configurations {
 	gametestRuntimeOnly.extendsFrom runtimeOnly
 }
 
+// From 26.3 brewing recipes are data (recipe/brewing); earlier versions register them in code
+if (stonecutter.eval(stonecutter.current.version, '>=26.3')) {
+	sourceSets.main.resources.srcDir rootProject.file('src/main/resources-26.3')
+}
+
 neoForge {
 	enable {
 		version = project.property('deps.neoforge')
