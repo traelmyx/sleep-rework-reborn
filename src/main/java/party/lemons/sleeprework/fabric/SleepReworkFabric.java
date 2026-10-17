@@ -64,7 +64,11 @@ public class SleepReworkFabric implements ModInitializer {
         };
 
         ServerTickEvents.START_SERVER_TICK.register(ServerHandler::serverTick);
+        //? if >=26 {
+        /^ServerTickEvents.END_LEVEL_TICK.register(ServerHandler::levelTick);
+        ^///?} else {
         ServerTickEvents.END_WORLD_TICK.register(ServerHandler::levelTick);
+        //?}
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> ServerHandler.syncJoin(handler.getPlayer()));
         CommandRegistrationCallback.EVENT.register(TiredCommand::register);
         EntitySleepEvents.ALLOW_SLEEPING.register((player, sleepingPos) -> {

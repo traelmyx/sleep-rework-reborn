@@ -14,7 +14,11 @@ public class SleepReworkFabricClient implements ClientModInitializer {
     public void onInitializeClient() {
         ClientPlayNetworking.registerGlobalReceiver(TirednessPayload.TYPE, (payload, context) -> context.client().execute(payload::handleOnClient));
         ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
+            //? if >=26 {
+            /^if (screen instanceof InventoryScreen inventory) Screens.getWidgets(screen).add(ClientHandler.createSleepWidget(inventory));
+            ^///?} else {
             if (screen instanceof InventoryScreen inventory) Screens.getButtons(screen).add(ClientHandler.createSleepWidget(inventory));
+            //?}
         });
     }
 }
